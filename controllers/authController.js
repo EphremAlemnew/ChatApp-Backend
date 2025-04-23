@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.register = async (req, res) => {
-  const { first_name, last_name, username, email, password } = req.body;
+  const { first_name, last_name, username, email, password, phone } = req.body;
 
   try {
     // Check if email already exists
@@ -21,9 +21,9 @@ exports.register = async (req, res) => {
     const user = await User.create({
       first_name,
       last_name,
-
       username,
       email,
+      phone, // ✅ Add phone here
       password: hashedPassword,
     });
 
@@ -38,7 +38,7 @@ exports.register = async (req, res) => {
         last_name: user.last_name,
         username: user.username,
         email: user.email,
-
+        phone: user.phone, // ✅ Include phone in response if needed
         isVerified: user.isVerified,
       },
       token,
