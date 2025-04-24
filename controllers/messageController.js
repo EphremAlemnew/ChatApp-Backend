@@ -74,14 +74,14 @@ exports.createMessage = async (req, res) => {
   }
 };
 
-exports.getMessages = async (req, res) => {
-  try {
-    const messages = await Message.find();
-    res.json(messages);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+// exports.getMessages = async (req, res) => {
+//   try {
+//     const messages = await Message.find();
+//     res.json(messages);
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 exports.getMessageById = async (req, res) => {
   try {
