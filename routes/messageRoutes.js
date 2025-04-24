@@ -8,5 +8,9 @@ router.post("/send", upload.single("file"), messageController.sendMessage);
 
 // Route to get messages between two users
 router.get("/:sender/:receiver", messageController.getMessages);
-
+router.post("/", messageController.createMessage);
+router.get("/", messageController.getMessages);
+router.get("/:id", messageController.getMessageById);
+router.put("/:id", messageController.updateMessage);
+router.delete("/:id", messageController.deleteMessage);
 module.exports = router;

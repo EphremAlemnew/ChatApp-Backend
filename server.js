@@ -9,6 +9,7 @@ const path = require("path");
 
 const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const userRoutes = require("./routes/userRoutes");
 const chatSocket = require("./sockets/chatSocket");
 const connectDB = require("./config/db");
 
@@ -37,7 +38,7 @@ app.use(express.json());
 
 // Auth routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/user", userRoutes);
 // Message routes
 app.use("/api/messages", messageRoutes);
 

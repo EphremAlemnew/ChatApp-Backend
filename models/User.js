@@ -5,10 +5,10 @@ const userSchema = new mongoose.Schema(
     last_name: String,
     username: String,
     phone: String,
-    bio: String,
+    bio: { type: String, default: null },
     email: { type: String, required: true, unique: true },
     password: String,
-    profilePic: String,
+    profilePic: { type: String, default: null },
     isOnline: { type: Boolean, default: false },
     last_seen: Date,
     // For email verification
