@@ -1,79 +1,66 @@
-const socketIO = require("socket.io");
-const User = require("../models/User"); // User model to update the online status
-const Message = require("../models/message"); // Message model for storing messages
-
-let onlineUsers = {}; // Track users who are currently online
-
-// Initialize Socket.io
-const initSocket = (server) => {
-  const io = socketIO(server);
-
+const User = require("../models/User");
+const Message = require("../models/message");
+const { Server } = require("socket.io");
+let onlineUsers = {}; // Map socket.id to userId
+const io = new Server({
+  /* options */
+});
+const initSocket = () => {
   io.on("connection", (socket) => {
-    console.log("New user connected:", socket.id);
+    console.log(`✅ New user connected! Socket ID: ${socket.id}`);
 
-    // Handle user online status
+    // When user comes online
     socket.on("userOnline", async (userId) => {
-      // Set user status to online
-      onlineUsers[socket.id] = userId;
+      if (!userId) return;
 
-      // Update user's online status in the database
+      onlineUsers[socket.id] = userId;
+      socket.join(userId); // Join user room
+
       await User.findByIdAndUpdate(userId, { online: true });
 
       console.log(`User ${userId} is online`);
-
-      // Emit updated online status to all connected clients
       io.emit("userStatusChange", { userId, status: "online" });
     });
 
-    // Handle user offline status
+    // Handle disconnection
     socket.on("disconnect", async () => {
-      // Find user ID by socket ID
       const userId = onlineUsers[socket.id];
-
       if (userId) {
-        // Set user status to offline
         delete onlineUsers[socket.id];
-
-        // Update user's online status in the database
         await User.findByIdAndUpdate(userId, { online: false });
 
         console.log(`User ${userId} is offline`);
-
-        // Emit updated online status to all connected clients
         io.emit("userStatusChange", { userId, status: "offline" });
       }
     });
 
-    // Handle sending a message
+    // Send direct message
     socket.on("sendMessage", async (messageData) => {
-      // Create a new message in the database
       const newMessage = new Message(messageData);
       await newMessage.save();
 
-      // Broadcast the message to the receiver
+      // Send to receiver's room
       io.to(messageData.receiver).emit("receiveMessage", newMessage);
-
       console.log(
         `Message sent from ${messageData.sender} to ${messageData.receiver}`
       );
     });
 
-    // Handle the private message (for one-on-one conversations)
+    // Join custom room (for groups or private chat rooms)
     socket.on("joinRoom", (roomId) => {
       socket.join(roomId);
       console.log(`User ${socket.id} joined room ${roomId}`);
     });
 
-    // Emit new message to the chat room
+    // Send room/group message
     socket.on("sendRoomMessage", async (roomData) => {
-      // Save the room message in the database
       const newMessage = new Message(roomData);
       await newMessage.save();
 
-      // Emit the message to the room
       io.to(roomData.roomId).emit("receiveRoomMessage", newMessage);
     });
   });
+  io.listen(5000);
 };
 
 module.exports = initSocket;

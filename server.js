@@ -46,17 +46,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Socket.io setup - handle connections and message events
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-
-  // Call your chatSocket function to handle events
-  chatSocket(socket, io);
-
-  // Handle disconnection event
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
-});
+chatSocket();
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
