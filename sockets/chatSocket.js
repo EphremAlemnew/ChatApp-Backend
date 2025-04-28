@@ -16,7 +16,7 @@ const initSocket = () => {
       onlineUsers[socket.id] = userId;
       socket.join(userId); // Join user room
 
-      await User.findByIdAndUpdate(userId, { online: true });
+      await User.findByIdAndUpdate(userId, { isOnline: true });
 
       console.log(`User ${userId} is online`);
       io.emit("userStatusChange", { userId, status: "online" });
@@ -27,7 +27,7 @@ const initSocket = () => {
       const userId = onlineUsers[socket.id];
       if (userId) {
         delete onlineUsers[socket.id];
-        await User.findByIdAndUpdate(userId, { online: false });
+        await User.findByIdAndUpdate(userId, { isOnline: false });
 
         console.log(`User ${userId} is offline`);
         io.emit("userStatusChange", { userId, status: "offline" });

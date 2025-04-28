@@ -1,4 +1,3 @@
-// models/message.js
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
@@ -13,14 +12,15 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    text: { type: String, required: false },
-    file: { type: String, required: false }, // URL of the uploaded file (e.g., image)
+    text: { type: String },
+    file: { type: String },
     messageType: {
       type: String,
       enum: ["text", "file", "file and text"],
       default: "text",
-    }, // Type of message
+    },
     timestamp: { type: Date, default: Date.now },
+    isRead: { type: Boolean, default: false }, // ✅ New field
   },
   { timestamps: true }
 );

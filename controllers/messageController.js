@@ -65,6 +65,26 @@ exports.getMessages = async (req, res) => {
   }
 };
 
+exports.getSenderMessages = async (req, res) => {
+  try {
+    const { sender, receiver } = req.params;
+
+    // Find messages between sender and receiver
+    const messages = await Message.find({
+      $or: [
+        { sender, receiver },
+        { sender: receiver, receiver: sender },
+      ],
+    }).sort({ timestamp: 1 });
+
+    // Return the messages as the response
+    res.status(200).json(messages);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.createMessage = async (req, res) => {
   try {
     const message = await Message.create(req.body);
