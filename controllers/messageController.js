@@ -134,3 +134,23 @@ exports.deleteMessage = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.markMessagesAsRead = async (req, res) => {
+  try {
+    const { senderId, receiverId } = req.params;
+
+    await Message.updateMany(
+      {
+        sender: senderId,
+        receiver: receiverId,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+
+    res.status(200).json({ message: "Messages marked as read" });
+    console.log("Messages marked as read");
+  } catch (error) {
+    console.error("Error marking messages as read:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

@@ -12,10 +12,10 @@ router.post("/send", upload.single("file"), messageController.sendMessage);
 // Route to get messages between two users
 router.get("/:sender/:receiver", messageController.getMessages);
 
-// router.put(
-//   "/markAsRead/:senderId/:receiverId",
-//   messageController.markMessagesAsRead
-// );
+router.put(
+  "/markAsRead/:senderId/:receiverId",
+  messageController.markMessagesAsRead
+);
 router.get("/:senderId", getConversationsBySender);
 router.post("/", messageController.createMessage);
 router.get("/", messageController.getMessages);

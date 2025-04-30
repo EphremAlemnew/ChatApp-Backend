@@ -22,8 +22,15 @@ const initSocket = () => {
     });
 
     // User typing
-    socket.on("typing", ({ sender, receiver }) => {
-      io.to(receiver).emit("typing", { sender });
+    // Typing status
+    socket.on("typing", ({ receiverId, isTyping }) => {
+      const senderId = onlineUsers[socket.id];
+      if (!senderId || !receiverId) return;
+
+      io.to(receiverId).emit("typing", {
+        userId: senderId,
+        isTyping: isTyping,
+      });
     });
 
     // User stopped typing
@@ -38,21 +45,42 @@ const initSocket = () => {
         isRead: false,
         createdAt: new Date(),
       });
+
       // await newMessage.save();
 
       io.to(messageData.receiver).emit("receiveMessage", newMessage);
-      console.log(
-        `Message sent from ${messageData.sender} to ${messageData.receiver}`
-      );
+
+      // 🔁 Emit updated unread counts to receiver
+      const unreadCounts = await Message.aggregate([
+        { $match: { receiver: messageData.receiver, isRead: false } },
+        {
+          $group: {
+            _id: "$sender",
+            unreadCount: { $sum: 1 },
+          },
+        },
+      ]);
+      io.to(messageData.receiver).emit("unreadCounts", unreadCounts);
     });
 
     // Mark all messages from sender to receiver as read
-    socket.on("markAllAsRead", async ({ sender, receiver }) => {
+    socket.on("markAllAsRead", async ({ senderId, receiverId }) => {
       await Message.updateMany(
-        { sender, receiver, isRead: false },
+        { sender: receiverId, receiver: senderId, isRead: false },
         { $set: { isRead: true } }
       );
-      io.to(sender).emit("messagesSeen", { byUser: receiver });
+
+      // Send updated unread count list to receiver
+      const unreadCounts = await Message.aggregate([
+        { $match: { receiver: senderId, isRead: false } },
+        {
+          $group: {
+            _id: "$sender",
+            unreadCount: { $sum: 1 },
+          },
+        },
+      ]);
+      io.to(receiverId).emit("unreadCounts", unreadCounts);
     });
 
     // Get unread count

@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     password: String,
     profilePic: { type: String, default: null },
     isOnline: { type: Boolean, default: false },
+    isTyping: { type: Boolean, default: false },
     last_seen: Date,
     // For email verification
     otp: String,
